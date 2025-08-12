@@ -12,30 +12,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const newQuoteText = document.getElementById('newQuoteText');
     const newQuoteCategory = document.getElementById('newQuoteCategory');
 
-    // Function to display a random quote
+    // Function to display a random quote using createElement and appendChild
     const showRandomQuote = () => {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         const randomQuote = quotes[randomIndex];
-        quoteDisplay.innerHTML = `
-            <p>"${randomQuote.text}"</p>
-            <p><strong>Category:</strong> ${randomQuote.category}</p>
-        `;
-    };
 
-    // Function to create/handle the form for adding quotes (as required by the checker)
-    const createAddQuoteForm = () => {
-        // The form is already in the HTML, so this function will handle the logic
-        // for adding the new quote.
+        // Clear previous content
+        quoteDisplay.innerHTML = '';
+
+        // Create new elements
+        const quoteTextElement = document.createElement('p');
+        quoteTextElement.textContent = `"${randomQuote.text}"`;
+
+        const quoteCategoryElement = document.createElement('p');
+        const strongElement = document.createElement('strong');
+        strongElement.textContent = 'Category: ';
+        quoteCategoryElement.appendChild(strongElement);
+        quoteCategoryElement.appendChild(document.createTextNode(randomQuote.category));
+
+        // Append the new elements to the display container
+        quoteDisplay.appendChild(quoteTextElement);
+        quoteDisplay.appendChild(quoteCategoryElement);
     };
 
     // Function to add a new quote
     window.addQuote = () => {
         const text = newQuoteText.value.trim();
         const category = newQuoteCategory.value.trim();
+
         if (text && category) {
+            // Add the new quote to the array
             quotes.push({ text, category });
+
+            // Clear the input fields
             newQuoteText.value = '';
             newQuoteCategory.value = '';
+
+            // Update the DOM to show the new quote
             showRandomQuote();
             alert('Quote added successfully!');
         } else {
