@@ -7,13 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: 'The greatest glory in living lies not in never falling, but in rising every time we fall.', category: 'Life' }
     ];
 
-    // Mock server data for simulation purposes
-    let serverQuotes = [
-        ...initialQuotes,
-        { text: 'The only thing necessary for the triumph of evil is for good men to do nothing.', category: 'Ethics' },
-        { text: 'Life is what happens when you’re busy making other plans.', category: 'Life' }
-    ];
-
     let quotes = JSON.parse(localStorage.getItem('quotes')) || initialQuotes;
 
     const quoteDisplay = document.getElementById('quoteDisplay');
@@ -97,22 +90,25 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteDisplay.appendChild(quoteCategoryElement);
     };
 
-    // Mock function to fetch data from a "server"
-    const fetchQuotesFromServer = () => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(serverQuotes);
-            }, 1000); // Simulate network latency
-        });
+    // Function to fetch data from the mock API
+    const fetchQuotesFromServer = async () => {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        const data = await response.json();
+        // We will use the first 10 posts as mock quotes
+        return data.slice(0, 10).map(post => ({
+            text: post.title,
+            category: 'Server'
+        }));
     };
 
-    // Mock function to post a new quote to the "server"
-    const postQuoteToServer = (quote) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                serverQuotes.push(quote);
-                resolve(true);
-            }, 500); // Simulate network latency
+    // Function to post a new quote to the mock API
+    const postQuoteToServer = async (quote) => {
+        await fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify(quote),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
         });
     };
     
