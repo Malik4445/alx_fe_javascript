@@ -163,11 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update local storage
             saveQuotes();
 
-            if (newLocalQuotes.length > 0) {
-                syncStatusDiv.textContent = 'Synced! New quotes from server and local quotes merged.';
-            } else {
-                syncStatusDiv.textContent = 'Synced! No new quotes from server.';
-            }
+            syncStatusDiv.textContent = 'Quotes synced with server!';
             
             populateCategories();
             filterQuotes();
@@ -219,10 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
     newQuoteBtn.addEventListener('click', showRandomQuote);
     syncBtn.addEventListener('click', syncQuotes);
 
-    // Simulate periodic syncing (every 30 seconds)
-    setInterval(syncQuotes, 30000);
-
     // Initial setup on page load
     populateCategories();
     filterQuotes();
+
+    // Simulate periodic syncing (every 30 seconds)
+    setInterval(syncQuotes, 30000);
 });
