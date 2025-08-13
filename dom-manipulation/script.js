@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchQuotesFromServer = async () => {
         const response = await fetch('https://jsonplaceholder.typicode.com/posts');
         const data = await response.json();
-        // We will use the first 10 posts as mock quotes
+        // Use the first 10 posts as mock quotes
         return data.slice(0, 10).map(post => ({
             text: post.title,
             category: 'Server'
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             body: JSON.stringify(quote),
             headers: {
-                'Content-type': 'application/json; charset=UTF-8',
+                'Content-Type': 'application/json; charset=UTF-8',
             },
         });
     };
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to handle data syncing and conflict resolution
+    // This function will handle data syncing and conflict resolution
     const syncQuotes = async () => {
         syncStatusDiv.textContent = 'Syncing with server...';
         
@@ -156,15 +156,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Conflict resolution: merge local and server data, with server data taking precedence
             const serverQuoteTexts = new Set(serverData.map(q => q.text));
             const newLocalQuotes = localData.filter(q => !serverQuoteTexts.has(q.text));
+            
+            // Update the main quotes array
             quotes = [...serverData, ...newLocalQuotes];
             
+            // Update local storage
+            saveQuotes();
+
             if (newLocalQuotes.length > 0) {
                 syncStatusDiv.textContent = 'Synced! New quotes from server and local quotes merged.';
             } else {
                 syncStatusDiv.textContent = 'Synced! No new quotes from server.';
             }
             
-            saveQuotes();
             populateCategories();
             filterQuotes();
             
@@ -215,10 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
     newQuoteBtn.addEventListener('click', showRandomQuote);
     syncBtn.addEventListener('click', syncQuotes);
 
+    // Simulate periodic syncing (every 30 seconds)
+    setInterval(syncQuotes, 30000);
+
     // Initial setup on page load
     populateCategories();
     filterQuotes();
-
-    // Simulate periodic syncing (every 30 seconds)
-    setInterval(syncQuotes, 30000);
 });
