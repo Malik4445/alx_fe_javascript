@@ -7,13 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: 'The greatest glory in living lies not in never falling, but in rising every time we fall.', category: 'Life' }
     ];
 
+    // Mock server data for simulation purposes
+    const serverQuotes = [
+        ...initialQuotes,
+        { text: 'The only thing necessary for the triumph of evil is for good men to do nothing.', category: 'Ethics' },
+        { text: 'Life is what happens when you’re busy making other plans.', category: 'Life' }
+    ];
+
     let quotes = JSON.parse(localStorage.getItem('quotes')) || initialQuotes;
 
     const quoteDisplay = document.getElementById('quoteDisplay');
     const newQuoteBtn = document.getElementById('newQuote');
     const categoryFilter = document.getElementById('categoryFilter');
     const exportBtn = document.getElementById('exportQuotes');
-    const importFile = document.getElementById('importFile');
+    const syncBtn = document.getElementById('syncQuotes');
+    const syncStatusDiv = document.getElementById('syncStatus');
     
     // Function to save quotes to local storage
     const saveQuotes = () => {
@@ -88,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteDisplay.appendChild(quoteTextElement);
         quoteDisplay.appendChild(quoteCategoryElement);
     };
-
+    
     // Function to add a new quote
     window.addQuote = () => {
         const newQuoteText = document.getElementById('newQuoteText');
@@ -115,6 +123,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             alert('Please enter both a quote and a category.');
         }
+    };
+
+    // Function to handle data syncing and conflict resolution
+    const syncQuotesWithServer = () => {
+        syncStatusDiv.textContent = 'Syncing with server...';
+        // Simulate a delay for server response
+        setTimeout(() => {
+            // Simple conflict resolution: server data takes precedence
+            if (JSON.stringify(quotes) !== JSON.stringify(serverQuotes)) {
+                quotes = [...serverQuotes]; // Replace local quotes with server quotes
+                saveQuotes();
+                populateCategories();
+                filterQuotes();
+                syncStatusDiv.textContent = 'Synced! Conflicts resolved using server data.';
+            } else {
+                syncStatusDiv.textContent = 'Sync complete. No conflicts detected.';
+            }
+        }, 1000); // 1-second delay to simulate network latency
     };
     
     // Function to export quotes as a JSON file
@@ -154,10 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
         fileReader.readAsText(event.target.files[0]);
     };
 
-    // Event listener on the "Show New Quote" button
+    // Event listeners
     newQuoteBtn.addEventListener('click', showRandomQuote);
-    
+    syncBtn.addEventListener('click', syncQuotesWithServer);
+
     // Initial setup on page load
     populateCategories();
     filterQuotes();
+
+    // Simulate periodic syncing (every 30 seconds)
+    setInterval(syncQuotesWithServer, 30000);
 });

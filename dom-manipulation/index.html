@@ -29,14 +29,16 @@
 
   <hr>
 
-  <h2>Data Management</h2>
+  <h2>Data Management & Sync</h2>
   <div>
     <button id="exportQuotes">Export Quotes to JSON</button>
     <label>
       Import Quotes from JSON:
       <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
     </label>
+    <button id="syncQuotes">Sync with Server</button>
   </div>
+  <div id="syncStatus"></div>
 
   <script src="script.js"></script>
 </body>
