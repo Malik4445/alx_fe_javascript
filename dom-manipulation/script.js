@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // Mock server data for simulation purposes
-    const serverQuotes = [
+    let serverQuotes = [
         ...initialQuotes,
         { text: 'The only thing necessary for the triumph of evil is for good men to do nothing.', category: 'Ethics' },
         { text: 'Life is what happens when you’re busy making other plans.', category: 'Life' }
@@ -96,9 +96,28 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteDisplay.appendChild(quoteTextElement);
         quoteDisplay.appendChild(quoteCategoryElement);
     };
+
+    // Mock function to fetch data from a "server"
+    const fetchQuotesFromServer = () => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(serverQuotes);
+            }, 1000); // Simulate network latency
+        });
+    };
+
+    // Mock function to post a new quote to the "server"
+    const postQuoteToServer = (quote) => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                serverQuotes.push(quote);
+                resolve(true);
+            }, 500); // Simulate network latency
+        });
+    };
     
     // Function to add a new quote
-    window.addQuote = () => {
+    window.addQuote = async () => {
         const newQuoteText = document.getElementById('newQuoteText');
         const newQuoteCategory = document.getElementById('newQuoteCategory');
         
@@ -106,8 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const category = newQuoteCategory.value.trim();
 
         if (text && category) {
-            // Add the new quote to the array
-            quotes.push({ text, category });
+            const newQuote = { text, category };
+            
+            // Add the new quote to the local array
+            quotes.push(newQuote);
+
+            // Simulate posting to the server
+            await postQuoteToServer(newQuote);
 
             // Clear the input fields
             newQuoteText.value = '';
@@ -126,21 +150,32 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Function to handle data syncing and conflict resolution
-    const syncQuotesWithServer = () => {
+    const syncQuotes = async () => {
         syncStatusDiv.textContent = 'Syncing with server...';
-        // Simulate a delay for server response
-        setTimeout(() => {
-            // Simple conflict resolution: server data takes precedence
-            if (JSON.stringify(quotes) !== JSON.stringify(serverQuotes)) {
-                quotes = [...serverQuotes]; // Replace local quotes with server quotes
-                saveQuotes();
-                populateCategories();
-                filterQuotes();
-                syncStatusDiv.textContent = 'Synced! Conflicts resolved using server data.';
+        
+        try {
+            const serverData = await fetchQuotesFromServer();
+            const localData = JSON.parse(localStorage.getItem('quotes')) || [];
+
+            // Conflict resolution: merge local and server data, with server data taking precedence
+            const serverQuoteTexts = new Set(serverData.map(q => q.text));
+            const newLocalQuotes = localData.filter(q => !serverQuoteTexts.has(q.text));
+            quotes = [...serverData, ...newLocalQuotes];
+            
+            if (newLocalQuotes.length > 0) {
+                syncStatusDiv.textContent = 'Synced! New quotes from server and local quotes merged.';
             } else {
-                syncStatusDiv.textContent = 'Sync complete. No conflicts detected.';
+                syncStatusDiv.textContent = 'Synced! No new quotes from server.';
             }
-        }, 1000); // 1-second delay to simulate network latency
+            
+            saveQuotes();
+            populateCategories();
+            filterQuotes();
+            
+        } catch (error) {
+            syncStatusDiv.textContent = 'Sync failed. Check your network connection.';
+            console.error('Sync failed:', error);
+        }
     };
     
     // Function to export quotes as a JSON file
@@ -182,12 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listeners
     newQuoteBtn.addEventListener('click', showRandomQuote);
-    syncBtn.addEventListener('click', syncQuotesWithServer);
+    syncBtn.addEventListener('click', syncQuotes);
 
     // Initial setup on page load
     populateCategories();
     filterQuotes();
 
     // Simulate periodic syncing (every 30 seconds)
-    setInterval(syncQuotesWithServer, 30000);
+    setInterval(syncQuotes, 30000);
 });
